@@ -1,0 +1,11 @@
+/config/config.php
+/config/config.local.php
+/.tools/
+/storage/*
+!/storage/.htaccess
+!/storage/.gitkeep
+/tests/.runtime/
+*.log
+__pycache__/
+*.pyc
+.DS_Store

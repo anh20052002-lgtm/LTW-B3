@@ -1,0 +1,13 @@
+# XAMPP / Apache 2.4. Keep source, configuration and tooling out of HTTP access.
+Options -Indexes
+DirectoryIndex index.php
+
+<FilesMatch "(?i)(^\.|\.(sql|md|docx|log|ini|bak|zip|py|ps1|sh)$|\.(example|local)\.php$)">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(?:config|includes|scripts|tests|\.tools)(?:/|$) - [F,L,NC]
+    RewriteRule (?:^|/)\. - [F,L]
+</IfModule>
