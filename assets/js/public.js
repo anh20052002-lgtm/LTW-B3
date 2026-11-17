@@ -1,13 +1,37 @@
 'use strict';
 
 (() => {
+    // Keep earlier bookmarks useful while primary navigation uses real pages.
+    if (document.body.dataset.publicPage === 'home') {
+        const legacyPages = {'#dich-vu': 'dich-vu.php', '#tu-van': 'tu-van.php', '#tra-cuu': 'tra-cuu.php', '#lien-he': 'lien-he.php'};
+        const destination = legacyPages[window.location.hash];
+        if (destination) {
+            window.location.replace(App.url(destination));
+            return;
+        }
+    }
     const consultationForm = document.getElementById('consultation-form');
     const lookupForm = document.getElementById('lookup-form');
     const successPanel = document.getElementById('consultation-success');
     const resultPanel = document.getElementById('lookup-result');
     const submittedCode = document.getElementById('submitted-code');
+    const copyStatus = document.getElementById('copy-status');
     const inFlight = new WeakSet();
-    let latestPhone = '';
+    const trackingStorageKey = `nexa.pending-tracking-code:${App.url('')}`;
+
+    function rememberTrackingCode(code) {
+        if (!/^NX-[A-Z0-9]{12}$/.test(code || '')) return;
+        try { sessionStorage.setItem(trackingStorageKey, code); }
+        catch (_) { /* Storage is optional; the displayed code remains usable. */ }
+    }
+
+    if (lookupForm) {
+        try {
+            const code = sessionStorage.getItem(trackingStorageKey);
+            sessionStorage.removeItem(trackingStorageKey);
+            if (/^NX-[A-Z0-9]{12}$/.test(code || '')) lookupForm.elements.tracking_code.value = code;
+        } catch (_) { /* Private browsing may disable storage. */ }
+    }
 
     function formData(form) {
         return Object.fromEntries([...new FormData(form).entries()].map(([key, value]) => [key, String(value).trim()]));
@@ -77,25 +101,25 @@
         return true;
     }
 
-    consultationForm.addEventListener('submit', async event => {
+    consultationForm?.addEventListener('submit', async event => {
         event.preventDefault();
         if (inFlight.has(consultationForm)) return;
         clearErrors(consultationForm);
         if (!validate(consultationForm)) return;
         const button = consultationForm.querySelector('[type="submit"]');
         const payload = formData(consultationForm);
-        latestPhone = payload.phone;
         inFlight.add(consultationForm);
         consultationForm.setAttribute('aria-busy', 'true');
         App.setBusy(button, true, 'Đang gửi yêu cầu…');
         try {
             const result = await App.request('api/public/create.php', {method: 'POST', body: payload});
             submittedCode.textContent = result.tracking_code;
-            document.getElementById('tracking-code').value = result.tracking_code;
-            document.getElementById('lookup-phone').value = latestPhone;
+            copyStatus.textContent = '';
+            rememberTrackingCode(result.tracking_code);
             consultationForm.classList.add('d-none');
             successPanel.classList.remove('d-none');
             successPanel.focus({preventScroll: true});
+            successPanel.scrollIntoView({block: 'center'});
             App.toast('Đã gửi yêu cầu. Hãy lưu mã tra cứu của bạn.', 'success');
         } catch (error) {
             showFailure(consultationForm, error);
@@ -106,11 +130,14 @@
         }
     });
 
-    document.getElementById('message').addEventListener('input', event => {
-        document.getElementById('message-count').textContent = `${event.target.value.length}/5000`;
-    });
+    const messageField = document.getElementById('message');
+    const updateMessageCount = () => {
+        if (messageField) document.getElementById('message-count').textContent = `${[...messageField.value].length}/5000`;
+    };
+    messageField?.addEventListener('input', updateMessageCount);
+    messageField?.addEventListener('change', updateMessageCount);
 
-    document.getElementById('send-another').addEventListener('click', () => {
+    document.getElementById('send-another')?.addEventListener('click', () => {
         consultationForm.reset();
         clearErrors(consultationForm);
         consultationForm.querySelectorAll('input, select, textarea').forEach(field => {
@@ -119,12 +146,14 @@
         });
         consultationForm.classList.remove('was-validated', 'd-none');
         successPanel.classList.add('d-none');
+        copyStatus.textContent = '';
         document.getElementById('message-count').textContent = '0/5000';
         document.getElementById('full-name').focus();
     });
 
-    document.getElementById('copy-code').addEventListener('click', async () => {
+    document.getElementById('copy-code')?.addEventListener('click', async () => {
         const code = submittedCode.textContent;
+        const previousFocus = document.activeElement;
         try {
             if (navigator.clipboard && window.isSecureContext) {
                 await navigator.clipboard.writeText(code);
@@ -135,32 +164,43 @@
                 field.style.position = 'fixed';
                 field.style.opacity = '0';
                 document.body.appendChild(field);
-                field.select();
-                const copied = document.execCommand('copy');
-                field.remove();
+                let copied = false;
+                try {
+                    field.select();
+                    copied = document.execCommand('copy');
+                } finally {
+                    field.remove();
+                    previousFocus?.focus({preventScroll: true});
+                }
                 if (!copied) throw new Error('copy failed');
             }
+            copyStatus.textContent = 'Đã sao chép mã yêu cầu.';
             App.toast('Đã sao chép mã yêu cầu.', 'success');
         } catch (_) {
+            copyStatus.textContent = 'Bạn có thể chọn mã phía trên để sao chép.';
             App.toast('Hãy chọn và sao chép mã yêu cầu đang hiển thị.', 'danger');
         }
     });
 
-    document.querySelectorAll('[data-select-service]').forEach(link => {
-        link.addEventListener('click', () => {
-            if (!successPanel.classList.contains('d-none')) document.getElementById('send-another').click();
-            const select = document.getElementById('service');
-            select.value = link.dataset.selectService;
-            select.dispatchEvent(new Event('input', {bubbles: true}));
-        });
-    });
+    document.getElementById('track-new-request')?.addEventListener('click', () => rememberTrackingCode(submittedCode.textContent));
 
-    document.querySelectorAll('#main-nav .nav-link, #main-nav .nav-cta').forEach(link => {
+    const navigation = document.getElementById('main-nav');
+    const closeDropdowns = () => navigation?.querySelectorAll('[data-bs-toggle="dropdown"][aria-expanded="true"]').forEach(toggle => bootstrap.Dropdown.getOrCreateInstance(toggle).hide());
+    document.querySelectorAll('#main-nav a[href]').forEach(link => {
         link.addEventListener('click', () => {
-            const navigation = document.getElementById('main-nav');
-            if (navigation.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(navigation).hide();
+            closeDropdowns();
+            if (navigation?.classList.contains('show')) bootstrap.Collapse.getOrCreateInstance(navigation).hide();
         });
     });
+    navigation?.addEventListener('hidden.bs.collapse', closeDropdowns);
+    navigation?.addEventListener('keydown', event => {
+        // Bootstrap handles Escape inside an open dropdown and restores its toggle.
+        if (event.key === 'Escape' && !navigation.querySelector('.dropdown-menu.show') && navigation.classList.contains('show')) {
+            bootstrap.Collapse.getOrCreateInstance(navigation).hide();
+            document.querySelector('[data-bs-target="#main-nav"]')?.focus();
+        }
+    });
+    window.matchMedia('(min-width: 1200px)').addEventListener('change', closeDropdowns);
 
     function formatDate(value) {
         if (!value) return 'Chưa có thông tin';
@@ -175,7 +215,7 @@
         completed: {label: 'Hoàn thành', icon: 'check-circle', note: 'Yêu cầu tư vấn đã hoàn thành. Bạn có thể gửi yêu cầu mới nếu cần trao đổi thêm.'}
     };
 
-    lookupForm.addEventListener('submit', async event => {
+    lookupForm?.addEventListener('submit', async event => {
         event.preventDefault();
         if (inFlight.has(lookupForm)) return;
         clearErrors(lookupForm);
@@ -207,8 +247,8 @@
         }
     });
 
-    [consultationForm, lookupForm].forEach(form => {
-        form.addEventListener('input', event => {
+    [consultationForm, lookupForm].filter(Boolean).forEach(form => {
+        const clearFieldError = event => {
             const field = event.target;
             if (field.matches('input,select,textarea')) {
                 field.classList.remove('is-invalid');
@@ -218,6 +258,8 @@
                     field.removeAttribute('aria-invalid');
                 }
             }
-        });
+        };
+        form.addEventListener('input', clearFieldError);
+        form.addEventListener('change', clearFieldError);
     });
 })();

@@ -43,6 +43,13 @@
         }
 
         const waiting = Number(data.stats.new);
+        const total = Number(data.stats.total), completed = Number(data.stats.completed);
+        const rate = total ? Math.round(completed / total * 100) : 0;
+        $('completionRate').textContent = `${rate}%`;
+        $('completionBar').style.width = `${rate}%`;
+        $('completionProgress').setAttribute('aria-valuenow', String(rate));
+        $('completionProgress').setAttribute('aria-valuetext', `${number.format(completed)} trong ${number.format(total)} yêu cầu đã hoàn thành`);
+        $('completionSummary').textContent = total ? `${number.format(completed)} / ${number.format(total)} yêu cầu đã hoàn thành.` : 'Chưa có yêu cầu để tính tiến độ.';
         $('queueSummary').textContent = waiting > 0
             ? `${number.format(waiting)} yêu cầu mới đang chờ phản hồi.`
             : 'Không có yêu cầu mới đang chờ tiếp nhận.';
@@ -75,6 +82,7 @@
                 $('recentRequests').innerHTML = stateRow('bi-wifi-off', 'Chưa tải được yêu cầu', 'Nhấn Làm mới để kết nối lại với hệ thống.');
                 $('serviceBreakdown').innerHTML = '<div class="breakdown-empty"><p>Chưa tải được thống kê dịch vụ.</p></div>';
                 $('queueSummary').textContent = 'Mở danh sách để kiểm tra yêu cầu chờ tiếp nhận.';
+                $('completionSummary').textContent = 'Chưa tải được tiến độ xử lý.';
             }
         } finally {
             if (thisRequest === requestNumber) {

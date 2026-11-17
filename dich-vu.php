@@ -1,0 +1,31 @@
+<?php
+declare(strict_types=1);
+require_once __DIR__ . '/includes/public-layout.php';
+require_once __DIR__ . '/includes/service-content.php';
+$catalog = public_service_catalog();
+$hasSelection = array_key_exists('service', $_GET);
+$key = is_string($_GET['service'] ?? null) ? $_GET['service'] : '';
+if ($hasSelection && !isset($catalog[$key])) {
+    http_response_code(404);
+    public_header('services', 'Không tìm thấy dịch vụ', 'Khám phá các dịch vụ website, CRM, marketing và tư vấn chuyển đổi số tại Nexa.');
+    public_page_intro('Dịch vụ', 'Dịch vụ bạn tìm chưa có tại đây.', 'Bạn có thể xem bốn nhóm dịch vụ hiện có hoặc chia sẻ trực tiếp nhu cầu để được tư vấn.');
+    ?>
+    <section class="section"><div class="container"><div class="public-empty"><span class="content-icon"><i class="bi bi-compass" aria-hidden="true"></i></span><h2>Cùng tìm hướng đi phù hợp.</h2><p>Chọn một dịch vụ trong danh mục hoặc bắt đầu từ bài toán của bạn.</p><div class="d-flex flex-wrap justify-content-center gap-3"><a class="btn btn-primary" href="<?= e(url('dich-vu.php')) ?>">Xem tất cả dịch vụ</a><a class="btn btn-light" href="<?= e(url('tu-van.php')) ?>">Gửi yêu cầu tư vấn</a></div></div></div></section>
+    <?php public_footer(); exit;
+}
+if ($hasSelection) {
+    $service = $catalog[$key];
+    public_header('services', $service['title'], $service['intro']);
+    ?>
+    <section class="page-hero service-detail-hero"><div class="container"><nav class="public-breadcrumb" aria-label="Đường dẫn"><a href="<?= e(url('index.php')) ?>">Trang chủ</a><i class="bi bi-chevron-right" aria-hidden="true"></i><a href="<?= e(url('dich-vu.php')) ?>">Dịch vụ</a><i class="bi bi-chevron-right" aria-hidden="true"></i><span aria-current="page"><?= e($service['title']) ?></span></nav><div class="row gy-4 gx-lg-5 align-items-center"><div class="col-lg-8"><p class="eyebrow">GIẢI PHÁP CỦA NEXA</p><h1><?= e($service['title']) ?></h1><p class="page-introduction"><?= e($service['intro']) ?></p><a class="btn btn-primary mt-4" href="<?= e(url('tu-van.php?service=' . $key)) ?>">Nhận tư vấn dịch vụ này <i class="bi bi-arrow-up-right ms-2" aria-hidden="true"></i></a></div><div class="col-lg-4"><div class="service-detail-symbol" aria-hidden="true"><i class="bi bi-<?= e($service['icon']) ?>"></i><span>NEXA / <?= e(strtoupper($key)) ?></span></div></div></div></div></section>
+    <section class="section" aria-labelledby="service-topics-heading"><div class="container"><div class="section-topline"><div><p class="eyebrow">NỘI DUNG TRAO ĐỔI</p><h2 class="section-heading" id="service-topics-heading">Làm rõ những điều quan trọng.</h2></div></div><div class="process-grid"><?php foreach ($service['topics'] as $number => [$heading, $text]): ?><article><span class="process-number">0<?= $number + 1 ?></span><h3><?= e($heading) ?></h3><p><?= e($text) ?></p></article><?php endforeach; ?></div></div></section>
+    <section class="section section-soft" aria-labelledby="service-fit-heading"><div class="container"><div class="row gy-4 gx-lg-5"><div class="col-lg-6"><p class="eyebrow">DÀNH CHO AI?</p><h2 class="section-heading" id="service-fit-heading">Khi bạn đang cần<br> một hướng đi rõ hơn.</h2><p class="section-description service-fit-description"><?= e($service['audience']) ?></p><a class="text-link mt-4" href="<?= e(url('tu-van.php?service=' . $key)) ?>">Trao đổi về nhu cầu của bạn <i class="bi bi-arrow-right" aria-hidden="true"></i></a></div><div class="col-lg-6"><div class="content-card preparation-card"><span class="content-icon"><i class="bi bi-journal-check" aria-hidden="true"></i></span><h3>Thông tin bạn có thể chuẩn bị</h3><ul class="check-list"><?php foreach ($service['prepare'] as $item): ?><li><i class="bi bi-check2" aria-hidden="true"></i><?= e($item) ?></li><?php endforeach; ?></ul><p>Chưa có đủ thông tin? Hãy mô tả điều bạn đang biết. Các chi tiết còn lại có thể được làm rõ trong quá trình trao đổi.</p></div></div></div></div></section>
+    <section class="section"><div class="container"><div class="service-bottom-cta"><div><h2>Bắt đầu với <?= e($service['title']) ?>.</h2><p>Dịch vụ sẽ được chọn sẵn khi bạn mở biểu mẫu tư vấn.</p></div><div class="d-flex flex-wrap gap-3"><a class="btn btn-primary" href="<?= e(url('tu-van.php?service=' . $key)) ?>">Gửi yêu cầu <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><a class="btn btn-light" href="<?= e(url('dich-vu.php')) ?>">Các dịch vụ khác</a></div></div></div></section>
+    <?php public_footer(); exit;
+}
+public_header('services', 'Dịch vụ Nexa', 'Khám phá bốn nhóm dịch vụ website, CRM, Digital Marketing và tư vấn chuyển đổi số. Chọn dịch vụ để tìm hiểu và gửi yêu cầu tư vấn.');
+public_page_intro('Dịch vụ', 'Mỗi bài toán, một hướng giải.', 'Bắt đầu từ điều bạn muốn cải thiện. Tìm hiểu phạm vi từng dịch vụ, sau đó chia sẻ nhu cầu để cùng làm rõ giải pháp phù hợp.');
+?>
+<section class="section services-catalog" aria-labelledby="service-catalog-heading"><div class="container"><div class="section-topline"><div><p class="eyebrow">BỐN NHÓM DỊCH VỤ</p><h2 class="section-heading" id="service-catalog-heading">Chọn điểm bắt đầu của bạn.</h2></div><span class="section-note">Tìm hiểu trước. Trao đổi cụ thể sau.</span></div><div class="service-grid catalog-grid"><?php public_service_cards(); ?></div></div></section>
+<section class="section section-soft" aria-labelledby="service-help-heading"><div class="container"><div class="row gx-lg-5 gy-4 align-items-center"><div class="col-lg-7"><p class="eyebrow">CHƯA BIẾT NÊN CHỌN GÌ?</p><h2 class="section-heading" id="service-help-heading">Hãy bắt đầu từ bài toán,<br> không phải tên giải pháp.</h2><p class="section-description service-fit-description">Nếu nhu cầu liên quan đến nhiều mảng, chọn Tư vấn chuyển đổi số. Chia sẻ cách bạn đang vận hành và điều muốn cải thiện để cuộc trao đổi có trọng tâm.</p></div><div class="col-lg-5"><div class="content-card"><span class="content-icon"><i class="bi bi-compass" aria-hidden="true"></i></span><h3>Cùng xác định ưu tiên</h3><p>Mô tả mục tiêu, khó khăn và nguồn lực hiện tại. Bạn không cần có sẵn một bản yêu cầu hoàn chỉnh.</p><a class="text-link" href="<?= e(url('tu-van.php?service=consulting')) ?>">Tư vấn hướng đi <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div></div></div></div></section>
+<?php public_consultation_cta(); public_footer(); ?>

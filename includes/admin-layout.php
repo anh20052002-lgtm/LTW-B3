@@ -11,6 +11,8 @@ function admin_header(string $title, string $active): void
         ['dashboard', 'admin/index.php', 'bi-grid-1x2', 'Tổng quan'],
         ['requests', 'admin/requests.php', 'bi-chat-square-text', 'Yêu cầu tư vấn'],
         ['customers', 'admin/customers.php', 'bi-people', 'Khách hàng'],
+        ['reports', 'admin/thong-ke.php', 'bi-bar-chart', 'Thống kê và báo cáo'],
+        ['account', 'admin/tai-khoan.php', 'bi-person-gear', 'Tài khoản'],
     ];
     ?>
 <!doctype html>
@@ -26,6 +28,7 @@ function admin_header(string $title, string $active): void
     <link rel="stylesheet" href="<?= e(url('assets/vendor/inter/inter.css')) ?>">
     <link rel="stylesheet" href="<?= e(url('assets/vendor/bootstrap/bootstrap.min.css')) ?>">
     <link rel="stylesheet" href="<?= e(url('assets/vendor/bootstrap-icons/bootstrap-icons.min.css')) ?>">
+    <link rel="stylesheet" href="<?= e(url('assets/css/tokens.css') . '?v=' . filemtime(NEXA_ROOT . '/assets/css/tokens.css')) ?>">
     <link rel="stylesheet" href="<?= e(url('assets/css/admin.css') . '?v=' . filemtime(NEXA_ROOT . '/assets/css/admin.css')) ?>">
 </head>
 <body data-admin="true" data-page="<?= e($active) ?>">
@@ -35,23 +38,23 @@ function admin_header(string $title, string $active): void
         <a class="brand" href="<?= e(url('admin/index.php')) ?>" id="sidebarTitle"><span class="brand-symbol"><i class="bi bi-intersect" aria-hidden="true"></i></span>nexa<span class="brand-suffix">CRM</span></a>
         <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#adminSidebar" aria-label="Đóng menu"></button>
     </div>
-    <div class="workspace-label"><span class="workspace-icon"><i class="bi bi-buildings" aria-hidden="true"></i></span><div>Nexa Workspace<small>Không gian quản trị</small></div><i class="bi bi-shield-check ms-auto" aria-hidden="true"></i></div>
-    <div class="nav-caption">QUẢN LÝ CÔNG VIỆC</div>
+    <div class="workspace-label"><span class="workspace-icon"><i class="bi bi-buildings" aria-hidden="true"></i></span><div>Nexa Workspace<small>Quản lý khách hàng</small></div><i class="bi bi-shield-check ms-auto" aria-hidden="true"></i></div>
+    <div class="nav-caption">KHÔNG GIAN QUẢN TRỊ</div>
     <nav class="sidebar-nav" aria-label="Menu quản trị">
         <?php foreach ($nav as [$key, $path, $icon, $label]): ?>
-        <a href="<?= e(url($path)) ?>" class="nav-item <?= $active === $key ? 'active' : '' ?>" <?= $active === $key ? 'aria-current="page"' : '' ?>><i class="bi <?= e($icon) ?>" aria-hidden="true"></i><?= e($label) ?><?php if ($active === $key): ?><span class="active-dot" aria-hidden="true"></span><?php endif; ?></a>
+        <a href="<?= e(url($path)) ?>" class="nav-item <?= $active === $key ? 'active' : '' ?>" <?= $active === $key ? 'aria-current="page"' : '' ?>><i class="bi <?= e($icon) ?>" aria-hidden="true"></i><span><?= e($label) ?></span><?php if ($active === $key): ?><i class="bi bi-chevron-right active-arrow" aria-hidden="true"></i><?php endif; ?></a>
         <?php endforeach; ?>
     </nav>
     <div class="sidebar-bottom">
-        <div class="sidebar-shortcut"><span>CỔNG TƯ VẤN</span><a href="<?= e(url('index.php#tu-van')) ?>">Xem trang khách hàng <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
+        <div class="sidebar-shortcut"><span>CỔNG KHÁCH HÀNG</span><a href="<?= e(url('tu-van.php')) ?>"><i class="bi bi-window" aria-hidden="true"></i> Mở trang tư vấn <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a></div>
         <button class="nav-item logout-button" data-logout type="button"><i class="bi bi-box-arrow-left" aria-hidden="true"></i>Đăng xuất</button>
-        <div class="sidebar-version">NEXA CRM <span>Phiên bản đồ án 1.0</span></div>
+        <div class="sidebar-version">NEXA CRM <span>Kết nối &amp; chăm sóc</span></div>
     </div>
 </aside>
 <div class="admin-shell">
     <header class="admin-topbar">
-        <div class="d-flex align-items-center gap-3"><button class="btn icon-button d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="Mở menu"><i class="bi bi-list" aria-hidden="true"></i></button><span class="topbar-crumb">Không gian làm việc <i class="bi bi-chevron-right" aria-hidden="true"></i> <strong><?= e($title) ?></strong></span></div>
-        <div class="topbar-right"><a class="public-link" href="<?= e(url('index.php')) ?>">Trang khách hàng <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><span class="topbar-separator"></span><div class="admin-avatar"><?= e($initial) ?></div><div class="admin-user"><strong><?= e($name) ?></strong><small>Quản trị viên</small></div></div>
+        <div class="topbar-leading"><button class="btn icon-button d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#adminSidebar" aria-controls="adminSidebar" aria-label="Mở menu"><i class="bi bi-list" aria-hidden="true"></i></button><nav aria-label="Điều hướng phân cấp"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="<?= e(url('admin/index.php')) ?>"><i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Không gian làm việc</span></a></li><li class="breadcrumb-item active" aria-current="page"><?= e($title) ?></li></ol></nav></div>
+        <div class="topbar-right"><a class="public-link" href="<?= e(url('index.php')) ?>">Trang khách hàng <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a><span class="topbar-separator"></span><a class="admin-profile-link" href="<?= e(url('admin/tai-khoan.php')) ?>" aria-label="Mở tài khoản của <?= e($name) ?>"><span class="admin-avatar"><?= e($initial) ?></span><span class="admin-user"><strong><?= e($name) ?></strong><small>Quản trị viên</small></span></a></div>
     </header>
     <main id="mainContent" class="admin-main">
     <?php

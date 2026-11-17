@@ -6,6 +6,16 @@ require_admin_api();
 [$page, $perPage, $search, $sort] = list_options();
 $where = [];
 $params = [];
+if (array_key_exists('customer_id', $_GET) && $_GET['customer_id'] !== '') {
+    $customerId = is_string($_GET['customer_id'])
+        ? filter_var($_GET['customer_id'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]])
+        : false;
+    if ($customerId === false) {
+        api_response(false, 'Bộ lọc hồ sơ khách hàng không hợp lệ.', null, ['customer_id' => 'ID khách hàng phải là số nguyên dương.'], 422);
+    }
+    $where[] = 'customer_id = ?';
+    $params[] = $customerId;
+}
 if ($search !== '') {
     $where[] = "(full_name LIKE ? ESCAPE '!' OR phone LIKE ? ESCAPE '!' OR tracking_code LIKE ? ESCAPE '!')";
     $term = like_term($search);

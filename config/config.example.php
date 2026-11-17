@@ -12,4 +12,10 @@ return [
     'db_pass' => '',
     // Leave blank for automatic XAMPP subdirectory detection.
     'app_url' => '',
+    // Optional real public contact details. Leave blank until verified.
+    // Environment equivalents: NEXA_CONTACT_EMAIL / PHONE / ADDRESS / HOURS.
+    'contact_email' => '',
+    'contact_phone' => '',
+    'contact_address' => '',
+    'contact_hours' => '',
 ];

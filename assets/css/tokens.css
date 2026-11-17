@@ -1,0 +1,46 @@
+/* Nexa design foundations. Shared by the public website and the CRM. */
+:root {
+    --nexa-font: 'Inter', sans-serif;
+    --nexa-primary: #2563eb;
+    --nexa-primary-hover: #1d4ed8;
+    --nexa-dark: #0f172a;
+    --nexa-text: #1e293b;
+    --nexa-muted: #64748b;
+    --nexa-border: #e2e8f0;
+    --nexa-background: #f8fafc;
+    --nexa-surface: #fff;
+    --nexa-success: #16a34a;
+    --nexa-warning: #f59e0b;
+    --nexa-danger: #dc2626;
+    --nexa-space-1: 4px;
+    --nexa-space-2: 8px;
+    --nexa-space-3: 12px;
+    --nexa-space-4: 16px;
+    --nexa-space-6: 24px;
+    --nexa-space-8: 32px;
+    --nexa-space-12: 48px;
+    --nexa-space-16: 64px;
+    --nexa-space-24: 96px;
+    --nexa-radius-control: 8px;
+    --nexa-radius-card: 16px;
+    --nexa-shadow-soft: 0 8px 32px rgb(15 23 42 / 5%);
+    --nexa-focus: 0 0 0 3px rgb(37 99 235 / 18%);
+    --nexa-motion: 180ms;
+    --bs-body-font-family: var(--nexa-font);
+    --bs-primary: var(--nexa-primary);
+    --bs-primary-rgb: 37, 99, 235;
+}
+
+/* Dialog actions stay above notifications created just before a modal opens. */
+body.modal-open #toastRegion { z-index: 1040; }
+
+@media (prefers-reduced-motion: reduce) {
+    :root { --nexa-motion: 0ms; }
+    html { scroll-behavior: auto !important; }
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

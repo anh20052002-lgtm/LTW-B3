@@ -2,7 +2,7 @@
 Options -Indexes
 DirectoryIndex index.php
 
-<FilesMatch "(?i)(^\.|\.(sql|md|docx|log|ini|bak|zip|py|ps1|sh)$|\.(example|local)\.php$)">
+<FilesMatch "(?i)(^\.|\.(sql|md|docx|log|ini|bak|zip|py|ps1|bat|cmd|sh)$|\.(example|local)\.php$)">
     Require all denied
 </FilesMatch>
 

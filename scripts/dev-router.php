@@ -32,7 +32,7 @@ $normalizedResolved = $resolved === false ? '' : str_replace('\\', '/', $resolve
 $inside = $normalizedResolved !== '' && (strcasecmp($normalizedResolved, rtrim($normalizedRoot, '/')) === 0
     || strncasecmp($normalizedResolved, $normalizedRoot, strlen($normalizedRoot)) === 0);
 $allowedDirectory = in_array(rtrim($path, '/'), ['', '/admin'], true);
-$allowedPhp = preg_match('~^/(?:index\.php|admin/(?:index|login|requests|customers)\.php|api/(?!_)[a-zA-Z0-9_/-]+\.php)$~D', $path);
+$allowedPhp = preg_match('~^/(?:(?:index|gioi-thieu|dich-vu|tu-van|tra-cuu|lien-he)\.php|admin/(?:index|login|requests|customers|thong-ke|tai-khoan)\.php|api/(?!_)[a-zA-Z0-9_/-]+\.php)$~D', $path);
 $allowedAsset = str_starts_with($path, '/assets/') && !preg_match('~\.php$~i', $path);
 
 if ($inside && (($allowedDirectory && is_dir($resolved)) || (is_file($resolved) && ($allowedPhp || $allowedAsset)))) {
